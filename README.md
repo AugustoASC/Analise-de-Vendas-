@@ -1,5 +1,5 @@
 
-# 📊 Análise de Vendas - Projeto Power BI BDAPB
+# 📊 Análise de Vendas - Projeto Power BI 
 
 Este projeto apresenta uma análise completa dos dados de vendas utilizando **Power BI**. A solução abrange desde a importação e modelagem dos dados até a criação de indicadores e dashboards interativos.
 
