@@ -1,108 +1,229 @@
-# 📊 Projeto de Análise de Vendas - BDAPB
 
-## 📌 Descrição do Projeto
+# 📊 Análise de Vendas - Projeto Power BI BDAPB
 
-Este projeto consiste em realizar análises de vendas utilizando a base de dados da empresa fictícia **BDAPB**. O objetivo é fornecer à Diretoria de Vendas informações consolidadas e de fácil interpretação, por meio de relatórios e dashboards interativos criados no **Power BI**.
-
----
-
-## 🗂️ Bases de Dados
-
-As bases fornecidas para o projeto estão em formato **CSV**:
-
-- **Cliente**: Cadastro de clientes
-- **Produtos**: Produtos disponíveis na loja
-- **Notas Fiscais**: Gestão de vendas
-- **Departamento**: Nome e descrição dos departamentos
-- **Lojas**: Identificação das lojas
-
-Além disso, será necessária a criação de uma **Tabela Calendário** no Power BI (preferencialmente utilizando a linguagem **M** ou outro recurso equivalente).
+Este projeto apresenta uma análise completa dos dados de vendas utilizando **Power BI**. A solução abrange desde a importação e modelagem dos dados até a criação de indicadores e dashboards interativos.
 
 ---
 
-## 🎯 Objetivos e Indicadores
+## ✅ Etapas Realizadas
 
-Com base nas tabelas fornecidas, a Diretoria deseja acompanhar os seguintes indicadores, com possibilidade de análise dinâmica por: **Data**, **Estado da Loja** e **Nome do Produto**.
+### 1. Importação das Bases
 
-### ✅ Indicadores Solicitados
+Todas as bases **CSV** foram importadas no Power BI Desktop, nomeadas e ajustadas conforme o seu conteúdo.
 
-1. Evolução de vendas mensal nos últimos dois anos, com possibilidade de Drill Down por **Ano** e **Mês**.
-2. Melhor dia de vendas em cada ano.
-3. Comparativo com a **meta de R$ 700 mil** entre 2017 e 2020, destacando os anos em que a meta foi superada.
-4. Quantidade total vendida por loja.
-5. Quantidade máxima vendida nas cidades e por departamentos, visualizados no mesmo gráfico.
-6. Preço médio e mediana por departamento.
-7. Comportamento do **valor total de vendas vs. valor total de custo** ao longo do período.
-8. Margem de crescimento de vendas por unidade nos últimos 12 meses.
-9. Acumulado móvel de vendas anual, considerando apenas os **3 últimos anos**.
-10. Perfil de compra por idade (% do valor de compra):
-    - Menor que 30 anos → **Jovem**
-    - De 30 a 65 anos → **Adulto**
-    - Acima de 65 anos → **Idoso**
-11. Tabela consolidada com:
-    - Data da primeira venda por produto
-    - Data da última venda por produto
-    - Diferença em dias entre a primeira e a última venda
-    - Formatação condicional com ícones:
-      - ✅ **Verde**: 0 a 1405 dias
-      - ⚠️ **Amarelo**: 1406 a 1420 dias
-      - ❌ **Vermelho**: acima de 1421 dias
-12. Total de vendas por gênero e localidade, utilizando o gráfico **"Tornado"** (disponível na AppSource do Power BI).
-13. Produtos mais vendidos por departamento apresentados em **cartões**, fixos e não afetados por filtros.
-14. Análises adicionais criadas a critério do analista para demonstrar domínio técnico (**mínimo: 1 aba extra**).
-15. Encaminhamento do arquivo **.pbix** via e-mail.
-16. Layout e Organização:
-    - Capa e abas seguindo padrão visual para melhor interpretação dos resultados.
-    - Filtros aplicados conforme necessidade, visando maior flexibilidade na análise.
-    - Gráficos adequados para cada análise.
-    - Garantia da **qualidade dos dados** com ajustes no Power Query, se necessário.
-    - Utilização de **paleta de cores personalizada** no Power BI.
+**Bases utilizadas:**
+
+- `Clientes.csv`
+- `Produtos.csv`
+- `Notas Fiscais.csv`
+- `Departamento.csv`
+- `Lojas.csv`
 
 ---
 
-## 💡 Diferenciais Avaliados
+### 2. Modelagem dos Dados
 
-- Integração de dados realizada dentro do Power BI ou através de:
-  - **Pentaho**
-  - **Integration Services (SSIS)**
-  - **Python**
+- Criados relacionamentos entre as tabelas:
+  - `Notas Fiscais` ligada a `Clientes`, `Produtos`, `Departamento` e `Lojas` através dos campos de código.
   
-- Uso de **medidas DAX** para cálculo de indicadores.
-- Definição correta de **relacionamentos entre tabelas**.
-- Garantia da **qualidade de dados** no Power Query.
+- Desenvolvida uma **Tabela Calendário** utilizando a linguagem **M** no Power Query:
+
+```m
+let
+    StartDate = #date(2016, 1, 1),
+    EndDate = #date(2022, 12, 31),
+    DateList = List.Dates(StartDate, Duration.Days(EndDate - StartDate)+1, #duration(1,0,0,0)),
+    Table = Table.FromList(DateList, Splitter.SplitByNothing(), {"Date"})
+in
+    Table
+```
+
+- Posteriormente, adicionadas as colunas:
+  - `Ano`
+  - `Mês`
+  - `Trimestre`
+
+---
+
+### 3. Transformação e Limpeza dos Dados
+
+- ✅ Conversão de colunas de datas para o tipo **datetime**.
+- ✅ Conversão de valores financeiros de **string** para **float**.
+- ✅ Correção de inconsistências de codificação (acentuação, espaços).
+- ✅ Normalização de campos como **Departamento** e **Localidade**, quando necessário.
+- ✅ Limpeza da primeira linha da coluna `Departamento` que estava fora de formatação.
+- ✅ Ajustes nas tabelas `Clientes` e `Lojas`: correção da localidade de `"são Paulo"` → `"São Paulo"` via transformação e substituição de valores.
+
+---
+
+### 4. Criação da Tabela NF/PRODUTO
+
+Criada uma tabela mesclando `Notas Fiscais` e `Produtos` para obter o **Valor Unitário (VL_Produto)** e permitir análises mais detalhadas sobre os itens vendidos.
+
+- Mesclagem feita pelo campo `Cod_Produto`.
+- Possibilitou cálculos mais precisos, como o **Valor de Venda**.
+
+---
+
+### 5. Criação de Colunas Calculadas
+
+Criada a coluna **Valor Venda** para determinar o valor de cada transação:
+
+```dax
+Valor Venda = 'Notas Fiscais'[Quantidade] * RELATED(Produtos[VL_Produto])
+```
+
+---
+
+### 6. Desenvolvimento dos Indicadores
+
+#### 1. Evolução de Vendas Mensal
+- **Gráfico:** Linha ou Área
+- **Eixo Y:** Valor Venda
+- **Eixo X:** Ano e Mês (com Drill Down)
+
+---
+
+#### 2. Melhor Dia de Vendas
+- **Visual:** Matriz ou Tabela com Data e Valor Venda.
+- **Função:** `MAXX` para encontrar o maior valor de vendas por ano.
+
+---
+
+#### 3. Análise de Meta
+- **Meta definida:** R$ 700 mil por ano (2017 a 2020).
+- **Gráfico:** Colunas Clusterizadas
+  - **Eixo X:** Ano
+  - **Eixo Y:** Soma de Valor Venda
+- Linha de constante representando a meta incluída.
+
+---
+
+#### 4. Quantidade Total Vendida por Loja
+- **Gráfico:** Barras Horizontais
+  - **Eixo Y:** Lojas
+  - **Eixo X:** Soma de Quantidade
+
+---
+
+#### 5. Quantidade Máxima por Cidade e Departamento
+- **Gráfico:** Barras Empilhadas ou Matriz
+  - **Eixo X:** Cidade
+  - **Eixo Y:** Quantidade Máxima
+  - **Legenda:** Departamento
+
+---
+
+#### 6. Preço Médio e Mediana por Departamento
+- **Visual:** Matriz mostrando:
+  - Departamento
+  - Preço Médio
+  - Mediana
+
+**Medidas criadas:**
+
+```dax
+Preço Médio = AVERAGEX(Produtos, Produtos[VL_Produto])
+Mediana = MEDIANX(Produtos, Produtos[VL_Produto])
+```
+
+---
+
+#### 7. Vendas x Custo
+- **Gráfico:** Linhas comparando:
+  - Valor Total Venda
+  - Valor Total Custo
+
+---
+
+#### 8. Margem de Crescimento de Vendas (12 meses)
+
+**Medida DAX:**
+
+```dax
+Crescimento = 
+VAR VendasAtual = [Total Vendas]
+VAR VendasAnterior = CALCULATE([Total Vendas], DATEADD('Calendario'[Date], -12, MONTH))
+RETURN DIVIDE(VendasAtual - VendasAnterior, VendasAnterior, 0)
+```
+
+- **Gráfico:** Linhas mostrando a evolução da margem de crescimento.
+
+---
+
+#### 9. Acumulado Móvel de Vendas (últimos 3 anos)
+
+**Medida DAX:**
+
+```dax
+Acumulado Móvel = 
+CALCULATE(
+    [Total Vendas],
+    DATESINPERIOD('Calendario'[Date], MAX('Calendario'[Date]), -365, DAY)
+)
+```
+
+- **Gráfico:** Demonstração do acumulado móvel.
+
+---
+
+#### 10. Perfil de Compra por Idade
+
+**Coluna calculada:**
+
+```dax
+Perfil Idade = 
+SWITCH(
+    TRUE(),
+    Clientes[Idade] < 30, "Jovem",
+    Clientes[Idade] > 65, "Idoso",
+    "Adulto"
+)
+```
+
+- Criado filtro de idade para facilitar a análise.
+- **Gráfico:** Colunas empilhadas ou pizza representando o percentual de valor de compra por perfil.
+
+---
+
+#### 11. Tabela Consolidada de Datas
+
+**Medidas criadas:**
+
+```dax
+Data Primeira Venda = MIN('Notas Fiscais'[Data Venda])
+Data Última Venda = MAX('Notas Fiscais'[Data Venda])
+Diferença em Dias = DATEDIFF([Data Primeira Venda], [Data Última Venda], DAY)
+```
+
+**Formatação condicional com ícones:**
+
+| Faixa de Dias | Ícone   |
+|---------------|---------|
+| 0 a 1405      | ✅ Verde |
+| 1406 a 1420   | ⚠️ Amarelo |
+| > 1421        | ❌ Vermelho |
+
+- Configuração realizada no painel de formatação condicional do Power BI.
+
+---
+
+### 7. Personalização Visual
+
+- Definida cor de fundo padrão do relatório: **RGB(21, 37, 76)**.
+- Aplicada formatação condicional na tabela consolidada de datas para destacar a diferença de vendas.
+- Criado filtro de idade para análises específicas sobre o perfil de compra.
+
+---
+
+## 🚀 Resultado
+
+O projeto resultou em um dashboard interativo e visualmente consistente, possibilitando análises estratégicas sobre as vendas, comportamento dos clientes e desempenho das lojas.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Power BI** (incluindo Power Query e DAX)
-- **M Language** (para tabela calendário, se aplicável)
-- **CSV** para importação de dados
-- Ferramentas auxiliares opcionais:
-  - **Pentaho**
-  - **SSIS**
-  - **Python**
-
----
-
-## 🎨 Layout e Visualização
-
-- Estrutura do relatório organizada com **menu inicial** e **abas** de dashboards.
-- **Filtros** aplicados de forma a garantir flexibilidade na análise.
-- **Gráficos** escolhidos de acordo com a melhor visualização de cada indicador.
-- **Paleta de cores personalizada** para identidade visual.
-- Garantia de **dados limpos e qualificados** para análises confiáveis.
-
----
-
-## 🚀 Como Executar o Projeto
-
-1. Abrir o **Power BI Desktop**.
-2. Importar as bases de dados **CSV**.
-3. Criar a **Tabela Calendário**.
-4. Realizar o **relacionamento correto** entre as tabelas.
-5. Desenvolver as **análises conforme as instruções**.
-6. Aplicar o **layout padrão** e a **paleta de cores**.
-7. Exportar o arquivo **.pbix** finalizado.
-
----
+- Power BI Desktop
+- Linguagem M (Power Query)
+- DAX (Data Analysis Expressions)
